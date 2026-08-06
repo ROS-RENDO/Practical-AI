@@ -46,6 +46,15 @@ class InvalidRequestError(LLMError):
     user_message = "The request could not be processed. Please adjust your input."
 
 
+class ContextLengthError(InvalidRequestError):
+    """Terminal — the prompt plus conversation exceed the model context."""
+
+    user_message = (
+        "The request is too long for the model's context window. "
+        "Try clearing the conversation history or lowering --max-tokens."
+    )
+
+
 class RateLimitError(LLMError):
     """Transient — the service is busy. Safe to retry with backoff."""
 
@@ -182,13 +191,13 @@ class LLMService:
                 )
             except LLMError as err:
                 # Configuration/request errors are terminal — do NOT retry.
-                if isinstance(err, (ConfigurationError, InvalidRequestError)):
+                if isinstance(err, (ConfigurationError, InvalidRequestError, ContextLengthError)):
                     raise
                 self._sleep_or_raise(err, attempt)
                 attempt += 1
             except Exception as raw:  # noqa: BLE001 — classify SDK/network errors
                 err = self._classify_error(raw)
-                if isinstance(err, (ConfigurationError, InvalidRequestError)):
+                if isinstance(err, (ConfigurationError, InvalidRequestError, ContextLengthError)):
                     raise err
                 self._sleep_or_raise(err, attempt)
                 attempt += 1
@@ -215,8 +224,13 @@ class LLMService:
             return ConfigurationError()
         if "ratelimit" in name or "rate limit" in text or "429" in text:
             return RateLimitError()
-        if "badrequest" in name or "invalidrequest" in name or "context length" in text:
-            return InvalidRequestError()
+        if (
+            "badrequest" in name
+            or "invalidrequest" in name
+            or "context length" in text
+            or "maximum context" in text
+        ):
+            return ContextLengthError()
         if any(k in name for k in ("timeout", "connection", "apierror", "internalserver")):
             return ServiceUnavailableError()
         return ServiceUnavailableError()
