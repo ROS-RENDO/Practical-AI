@@ -1,0 +1,11 @@
+Task 2 — Practice SDD with GitHub Spec Kit:x    
+
+1. What is the difference between /speckit.specify and /speckit.plan? Give one example.
+->	/speckit.specify defines the WHAT and WHY from the user's perspective (e.g., "A user needs to be able to search their tasks by title"). /speckit.plan defines the HOW from a technical perspective (e.g., "Create a React component that fetches data via a GET /api/tasks endpoint from a PostgreSQL database"). 
+2. What ambiguity did /speckit.clarify help you resolve?
+->	It helped resolve hidden assumptions about edge cases. For example, the spec stated "Users can search for tasks," but it was ambiguous what should happen if a user enters a search query that has no matching results. /speckit.clarify helped explicitly define that the application should display a clear "No results found" message instead of crashing or showing a blank screen. 
+3. What does /speckit.analyze check, and did it identify any issue in your project?
+->	/speckit.analyze checks for consistency and traceability across the artifacts (the spec, the plan, and the tasks). Yes, it identified an issue: the specification stated that search should be case-insensitive, but /speckit.analyze flagged that there was no corresponding task in tasks.md to actually write a test to verify case-insensitive matching. 
+4. Compare Task 1 with the Spec Kit workflow. Which gave you better control over the AI coding agent, and why?
+->	The Spec Kit workflow provided much better control over the AI. In Task 1, writing a manual spec leaves room for human error and hidden assumptions, causing the AI to drift or hallucinate technical details. By breaking the process into distinct stages (specify → clarify → plan), the Spec Kit workflow forces the AI to ask questions and establish a strict technical blueprint before any code is written, eliminating rogue design decisions. 
+
